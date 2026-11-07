@@ -7,6 +7,7 @@
  *   - source shape / duplicate ids / bad hex / bad variant
  *   - generated Codex string differs from fixtures/codex/<id>.txt
  *   - DSH bundle missing an id, or a token map value is not a string
+ *   - missing / stale README swatch, or a README that stopped linking one
  *   - generated client.js does not parse
  * Warnings (reported, not fatal — design decisions, not build errors):
  *   - `codeThemeId` not in the known built-in list (Codex version drift)
@@ -83,6 +84,28 @@ try {
   fail(`packages/dsh/lib/client.js does not parse: ${error.message}`);
 }
 
+// --- README swatches ------------------------------------------------------
+const readmes = ['README.md', 'README.zh.md'];
+for (const variant of doc.variants) {
+  const relative = `media/swatches/${variant.id}.svg`;
+  let svg;
+  try {
+    svg = read(relative);
+  } catch {
+    fail(`${relative}: missing — run node scripts/build.mjs`);
+    continue;
+  }
+  if (!svg.startsWith('<svg')) fail(`${relative}: not an SVG document`);
+  for (const [role, value] of Object.entries(variant.palette)) {
+    if (role === 'skill') continue;
+    if (!svg.includes(value)) fail(`${relative}: missing ${role} color ${value}`);
+  }
+  if (svg.includes('__')) fail(`${relative}: contains an unreplaced placeholder`);
+  for (const readme of readmes) {
+    if (!read(readme).includes(relative)) fail(`${readme}: does not reference ${relative}`);
+  }
+}
+
 // --- contrast report ------------------------------------------------------
 const rows = [];
 for (const variant of doc.variants) {
@@ -110,4 +133,4 @@ if (failures.length > 0) {
   for (const message of failures) console.error('  ✗ ' + message);
   process.exit(1);
 }
-console.log(`\nOK — ${doc.variants.length} variants, ${themes.length} DSH themes, Codex round-trip exact`);
+console.log(`\nOK — ${doc.variants.length} variants, ${themes.length} DSH themes, Codex round-trip exact, ${doc.variants.length} swatches`);

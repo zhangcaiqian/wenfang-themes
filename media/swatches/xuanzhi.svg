@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="208" viewBox="0 0 640 208" role="img" aria-label="Wenfang Xuanzhi light">
+  <title>Wenfang — Xuanzhi light</title>
+  <rect width="640" height="208" rx="16" fill="#f7f4ed"/>
+  <rect x="0.5" y="0.5" width="639" height="207" rx="15.5" fill="none" stroke="#d8d5ce"/>
+
+  <text x="24" y="42" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="600" fill="#35322d">Xuanzhi</text>
+  <text x="24" y="62" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#8c8983">Wenfang · light · solarized</text>
+
+  <circle cx="478" cy="34" r="7" fill="#0f59a4"/>
+  <text x="478" y="56" text-anchor="middle" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#8c8983">0f59a4</text>
+  <circle cx="544" cy="34" r="7" fill="#1a6840"/>
+  <text x="544" y="56" text-anchor="middle" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#8c8983">1a6840</text>
+  <circle cx="610" cy="34" r="7" fill="#c23142"/>
+  <text x="610" y="56" text-anchor="middle" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="9" fill="#8c8983">c23142</text>
+
+  <rect x="24" y="84" width="300" height="100" rx="10" fill="#ece9e2" stroke="#d8d5ce"/>
+  <rect x="40" y="102" width="200" height="7" rx="3.5" fill="#35322d" opacity="0.88"/>
+  <rect x="40" y="118" width="240" height="7" rx="3.5" fill="#35322d" opacity="0.55"/>
+  <rect x="40" y="134" width="150" height="7" rx="3.5" fill="#8c8983" opacity="0.8"/>
+  <rect x="40" y="152" width="72" height="20" rx="10" fill="#0f59a4"/>
+  <text x="76" y="166" text-anchor="middle" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="600" fill="#f7f4ed">Aa</text>
+  <rect x="122" y="152" width="46" height="20" rx="10" fill="none" stroke="#d8d5ce"/>
+  <text x="145" y="166" text-anchor="middle" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="10" fill="#8c8983">···</text>
+
+  <rect x="340" y="84" width="276" height="100" rx="10" fill="#e5e2db" stroke="#d8d5ce"/>
+  <rect x="348" y="94" width="260" height="24" rx="6" fill="#cfdbce"/>
+  <text x="356" y="110" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#1a6840">+ added</text>
+  <rect x="348" y="122" width="260" height="24" rx="6" fill="#edd1ce"/>
+  <text x="356" y="138" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#c23142">- removed</text>
+  <rect x="356" y="154" width="180" height="6" rx="3" fill="#8c8983" opacity="0.5"/>
+  <rect x="356" y="166" width="120" height="6" rx="3" fill="#8c8983" opacity="0.35"/>
+</svg>

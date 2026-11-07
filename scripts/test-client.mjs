@@ -121,8 +121,8 @@ function boot({ storage, preference: initialPreference }) {
   const storage = createStorage();
   const result = boot({ storage, preference: 'dark' });
   check(result.calls.registered.length === 6, `first boot: expected 6 registrations, got ${result.calls.registered.length}`);
-  check(result.preference() === 'wenfang-xuanmo', `first boot: expected wenfang-xuanmo, got ${result.preference()}`);
-  check(storage.getItem('wenfang-themes:active') === 'wenfang-xuanmo', 'first boot: active choice not stored');
+  check(result.preference() === '文房·玄墨', `first boot: expected 文房·玄墨, got ${result.preference()}`);
+  check(storage.getItem('wenfang-themes:active') === '文房·玄墨', 'first boot: active choice not stored');
   check(storage.getItem('wenfang-themes:initialized') === '1', 'first boot: init marker not stored');
   for (const definition of result.calls.registered) {
     check(definition.tokens && Object.keys(definition.tokens).length >= 20, `${definition.id}: fewer than 20 tokens`);
@@ -135,16 +135,16 @@ function boot({ storage, preference: initialPreference }) {
 // 2. First boot, light preference → first light variant.
 {
   const result = boot({ storage: createStorage(), preference: 'light' });
-  check(result.preference() === 'wenfang-xuanzhi', `light first boot: expected wenfang-xuanzhi, got ${result.preference()}`);
+  check(result.preference() === '文房·宣纸', `light first boot: expected 文房·宣纸, got ${result.preference()}`);
 }
 
 // 3. Stored choice is replayed across boots.
 {
   const result = boot({
-    storage: createStorage({ 'wenfang-themes:active': 'wenfang-qingci', 'wenfang-themes:initialized': '1' }),
+    storage: createStorage({ 'wenfang-themes:active': '文房·青瓷', 'wenfang-themes:initialized': '1' }),
     preference: 'light',
   });
-  check(result.preference() === 'wenfang-qingci', `restore: expected wenfang-qingci, got ${result.preference()}`);
+  check(result.preference() === '文房·青瓷', `restore: expected 文房·青瓷, got ${result.preference()}`);
 }
 
 // 4. Initialized + switched back to a built-in palette → do not override.
@@ -181,21 +181,21 @@ function boot({ storage, preference: initialPreference }) {
 {
   const storage = createStorage();
   const result = boot({ storage, preference: 'system' });
-  check(result.preference() === 'wenfang-xuanmo', `adopt race: expected initial wenfang-xuanmo, got ${result.preference()}`);
+  check(result.preference() === '文房·玄墨', `adopt race: expected initial 文房·玄墨, got ${result.preference()}`);
   result.adopt('dark');
   await sleep(120);
-  check(result.preference() === 'wenfang-xuanmo', `adopt race: expected re-asserted wenfang-xuanmo, got ${result.preference()}`);
-  check(storage.getItem('wenfang-themes:active') === 'wenfang-xuanmo', 'adopt race: active choice lost');
+  check(result.preference() === '文房·玄墨', `adopt race: expected re-asserted 文房·玄墨, got ${result.preference()}`);
+  check(storage.getItem('wenfang-themes:active') === '文房·玄墨', 'adopt race: active choice lost');
 }
 
 // 8. A stored palette survives adoption on the next boot.
 {
-  const storage = createStorage({ 'wenfang-themes:active': 'wenfang-qingci', 'wenfang-themes:initialized': '1' });
+  const storage = createStorage({ 'wenfang-themes:active': '文房·青瓷', 'wenfang-themes:initialized': '1' });
   const result = boot({ storage, preference: 'dark' });
-  check(result.preference() === 'wenfang-qingci', `stored + adopt: expected qingci, got ${result.preference()}`);
+  check(result.preference() === '文房·青瓷', `stored + adopt: expected qingci, got ${result.preference()}`);
   result.adopt('dark');
   await sleep(120);
-  check(result.preference() === 'wenfang-qingci', `stored + adopt: expected qingci after adopt, got ${result.preference()}`);
+  check(result.preference() === '文房·青瓷', `stored + adopt: expected qingci after adopt, got ${result.preference()}`);
 }
 
 // 9. An explicit built-in choice (setTheme from the UI) wins over later adoption.
@@ -215,10 +215,18 @@ function boot({ storage, preference: initialPreference }) {
 {
   const storage = createStorage({ 'wenfang-themes:initialized': '1' });
   const result = boot({ storage, preference: 'light' });
-  result.switchTo('wenfang-canghai');
+  result.switchTo('文房·沧海');
   await sleep(60);
-  check(result.preference() === 'wenfang-canghai', `re-pick: expected canghai, got ${result.preference()}`);
-  check(storage.getItem('wenfang-themes:active') === 'wenfang-canghai', 're-pick: active choice not stored');
+  check(result.preference() === '文房·沧海', `re-pick: expected canghai, got ${result.preference()}`);
+  check(storage.getItem('wenfang-themes:active') === '文房·沧海', 're-pick: active choice not stored');
+}
+
+// 11. Pre-release ASCII ids migrate to the shipped short labels.
+{
+  const storage = createStorage({ 'wenfang-themes:active': 'wenfang-xuanmo', 'wenfang-themes:initialized': '1' });
+  const result = boot({ storage, preference: 'light' });
+  check(result.preference() === '文房·玄墨', `legacy id migration: expected 文房·玄墨, got ${result.preference()}`);
+  check(storage.getItem('wenfang-themes:active') === '文房·玄墨', 'legacy id migration: stored id was not rewritten');
 }
 
 if (failures.length > 0) {

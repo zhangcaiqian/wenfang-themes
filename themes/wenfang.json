@@ -17,7 +17,10 @@
       "nameEn": "Xuanmo",
       "variant": "dark",
       "tagline": "松烟墨底、朱砂批注；适合夜间长时间编码。",
-      "codex": { "codeThemeId": "one-dark", "contrast": 58 },
+      "codex": {
+        "codeThemeId": "one-dark",
+        "contrast": 58
+      },
       "palette": {
         "surface": "#14131a",
         "ink": "#d4cec4",
@@ -25,7 +28,8 @@
         "diffAdded": "#2bae85",
         "diffRemoved": "#e25737",
         "skill": "#c08eaf"
-      }
+      },
+      "dshId": "文房·玄墨"
     },
     {
       "id": "xuanmo-dimmed",
@@ -33,7 +37,10 @@
       "nameEn": "Xuanmo Dimmed",
       "variant": "dark",
       "tagline": "同一方墨、灯光调暗一档；适合光线柔和的房间。",
-      "codex": { "codeThemeId": "one-dark", "contrast": 52 },
+      "codex": {
+        "codeThemeId": "one-dark",
+        "contrast": 52
+      },
       "palette": {
         "surface": "#19181e",
         "ink": "#d8d2c6",
@@ -41,7 +48,8 @@
         "diffAdded": "#69a794",
         "diffRemoved": "#e25737",
         "skill": "#d6a01d"
-      }
+      },
+      "dshId": "文房·玄墨·暗"
     },
     {
       "id": "xuanzhi",
@@ -49,7 +57,10 @@
       "nameEn": "Xuanzhi",
       "variant": "light",
       "tagline": "生宣暖白、青绿设色；适合白天浅色环境。",
-      "codex": { "codeThemeId": "solarized", "contrast": 22 },
+      "codex": {
+        "codeThemeId": "solarized",
+        "contrast": 22
+      },
       "palette": {
         "surface": "#f7f4ed",
         "ink": "#35322d",
@@ -57,7 +68,8 @@
         "diffAdded": "#1a6840",
         "diffRemoved": "#c23142",
         "skill": "#813c85"
-      }
+      },
+      "dshId": "文房·宣纸"
     },
     {
       "id": "xuanzhi-dimmed",
@@ -65,7 +77,10 @@
       "nameEn": "Xuanzhi Dimmed",
       "variant": "light",
       "tagline": "陈纸暖灰、墨色更深；适合低眩光阅读。",
-      "codex": { "codeThemeId": "solarized", "contrast": 20 },
+      "codex": {
+        "codeThemeId": "solarized",
+        "contrast": 20
+      },
       "palette": {
         "surface": "#e9e2d4",
         "ink": "#2f2b25",
@@ -73,7 +88,8 @@
         "diffAdded": "#1a6840",
         "diffRemoved": "#82111f",
         "skill": "#525288"
-      }
+      },
+      "dshId": "文房·宣纸·暗"
     },
     {
       "id": "canghai",
@@ -81,7 +97,10 @@
       "nameEn": "Canghai",
       "variant": "dark",
       "tagline": "深海暮色、青绿矿物；冷静深色画布。",
-      "codex": { "codeThemeId": "nord", "contrast": 56 },
+      "codex": {
+        "codeThemeId": "nord",
+        "contrast": 56
+      },
       "palette": {
         "surface": "#0d1822",
         "ink": "#c8d4dd",
@@ -89,7 +108,8 @@
         "diffAdded": "#1ba784",
         "diffRemoved": "#e25737",
         "skill": "#c08eaf"
-      }
+      },
+      "dshId": "文房·沧海"
     },
     {
       "id": "qingci",
@@ -97,7 +117,10 @@
       "nameEn": "Qingci",
       "variant": "light",
       "tagline": "月白釉底、青灰题字；适合白天与浅色桌面。",
-      "codex": { "codeThemeId": "github-light", "contrast": 24 },
+      "codex": {
+        "codeThemeId": "github-light",
+        "contrast": 24
+      },
       "palette": {
         "surface": "#e8f0ec",
         "ink": "#2b333e",
@@ -105,7 +128,8 @@
         "diffAdded": "#1a6840",
         "diffRemoved": "#82111f",
         "skill": "#813c85"
-      }
+      },
+      "dshId": "文房·青瓷"
     }
   ]
 }

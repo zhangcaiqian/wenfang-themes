@@ -4,12 +4,15 @@ Wenfang · 文房六色 的 DeepSeek Harness 主题插件。一个包注册六�
 
 | DSH 主题 id | 名称 | colorScheme |
 | --- | --- | --- |
-| `wenfang-xuanmo` | 玄墨 | dark |
-| `wenfang-xuanmo-dimmed` | 玄墨 Dimmed | dark |
-| `wenfang-xuanzhi` | 宣纸 | light |
-| `wenfang-xuanzhi-dimmed` | 宣纸 Dimmed | light |
-| `wenfang-canghai` | 沧海 | dark |
-| `wenfang-qingci` | 青瓷 | light |
+| `文房·玄墨` | 玄墨 | dark |
+| `文房·玄墨·暗` | 玄墨 Dimmed | dark |
+| `文房·宣纸` | 宣纸 | light |
+| `文房·宣纸·暗` | 宣纸 Dimmed | light |
+| `文房·沧海` | 沧海 | dark |
+| `文房·青瓷` | 青瓷 | light |
+
+> id 同时是 dsh-market 主题卡片的显示标签；早期 ASCII id（`wenfang-xuanmo` 等）会在
+> 加载时自动迁移。
 
 ## 安装
 

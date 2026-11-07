@@ -19,18 +19,20 @@
 
 import { mix } from './color.mjs';
 
-/** DSH theme id prefix (separate from the Codex string, which has no id). */
-export const SERIES_SLUG = 'wenfang';
-
 /** Warn amber: Codex has no warn slot, so the series pins one physical amber. */
 const WARN = { dark: '#d6a01d', light: '#a86a00' };
 
 /**
- * DSH theme id for one variant, e.g. `wenfang-xuanmo`.
+ * DSH theme id for one variant.
+ *
+ * The market renders a registered theme's `id` verbatim as the palette card label
+ * and gives the card's action button no room for a long label — `wenfang-xuanmo-dimmed`
+ * wrapped the button onto two lines in a real render. Ids are therefore the short
+ * Chinese display names (`文房·玄墨`), which stay readable and fit the card.
  * @param {any} variant
  */
 export function dshThemeId(variant) {
-  return `${SERIES_SLUG}-${variant.id}`;
+  return variant.dshId ?? `wenfang-${variant.id}`;
 }
 
 /**

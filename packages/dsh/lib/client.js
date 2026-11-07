@@ -32,7 +32,7 @@ window.__ModuleLoader__.load({
     /** @type {{ id: string, labelZh: string, labelEn: string, colorScheme: 'light' | 'dark', tagline: string, tokens: Record<string, string> }[]} */
     const THEMES = [
   {
-    "id": "wenfang-xuanmo",
+    "id": "文房·玄墨",
     "labelZh": "玄墨",
     "labelEn": "Xuanmo",
     "colorScheme": "dark",
@@ -72,7 +72,7 @@ window.__ModuleLoader__.load({
     }
   },
   {
-    "id": "wenfang-xuanmo-dimmed",
+    "id": "文房·玄墨·暗",
     "labelZh": "玄墨 Dimmed",
     "labelEn": "Xuanmo Dimmed",
     "colorScheme": "dark",
@@ -112,7 +112,7 @@ window.__ModuleLoader__.load({
     }
   },
   {
-    "id": "wenfang-xuanzhi",
+    "id": "文房·宣纸",
     "labelZh": "宣纸",
     "labelEn": "Xuanzhi",
     "colorScheme": "light",
@@ -152,7 +152,7 @@ window.__ModuleLoader__.load({
     }
   },
   {
-    "id": "wenfang-xuanzhi-dimmed",
+    "id": "文房·宣纸·暗",
     "labelZh": "宣纸 Dimmed",
     "labelEn": "Xuanzhi Dimmed",
     "colorScheme": "light",
@@ -192,7 +192,7 @@ window.__ModuleLoader__.load({
     }
   },
   {
-    "id": "wenfang-canghai",
+    "id": "文房·沧海",
     "labelZh": "沧海",
     "labelEn": "Canghai",
     "colorScheme": "dark",
@@ -232,7 +232,7 @@ window.__ModuleLoader__.load({
     }
   },
   {
-    "id": "wenfang-qingci",
+    "id": "文房·青瓷",
     "labelZh": "青瓷",
     "labelEn": "Qingci",
     "colorScheme": "light",
@@ -277,6 +277,15 @@ window.__ModuleLoader__.load({
     const FALLBACK_WINDOW_MS = 6000;
     const MAX_REASSERTS = 24;
     const IDS = new Set(THEMES.map((theme) => theme.id));
+    /** Pre-release ids (ASCII slugs) mapped to the shipped short Chinese labels. */
+    const LEGACY_IDS = {
+      'wenfang-xuanmo': '文房·玄墨',
+      'wenfang-xuanmo-dimmed': '文房·玄墨·暗',
+      'wenfang-xuanzhi': '文房·宣纸',
+      'wenfang-xuanzhi-dimmed': '文房·宣纸·暗',
+      'wenfang-canghai': '文房·沧海',
+      'wenfang-qingci': '文房·青瓷',
+    };
 
     /** localStorage can be unavailable (sandboxed frame, storage disabled); never let it break boot. */
     const read = (key) => {
@@ -339,7 +348,9 @@ window.__ModuleLoader__.load({
         };
 
         const bootPreference = service.getTheme()?.preference;
-        const saved = read(ACTIVE_KEY);
+        const stored = read(ACTIVE_KEY);
+        const saved = stored !== null && !IDS.has(stored) && LEGACY_IDS[stored] !== undefined ? LEGACY_IDS[stored] : stored;
+        if (saved !== stored) write(ACTIVE_KEY, saved);
         const initialized = read(INIT_KEY) !== null;
         /** The palette this boot wants active, or null when the user chose a built-in one. */
         let target = saved !== null && IDS.has(saved) ? saved : !initialized ? preferredId(bootPreference) : null;

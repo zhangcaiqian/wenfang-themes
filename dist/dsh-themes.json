@@ -1,6 +1,6 @@
 [
   {
-    "id": "wenfang-xuanmo",
+    "id": "文房·玄墨",
     "labelZh": "玄墨",
     "labelEn": "Xuanmo",
     "colorScheme": "dark",
@@ -40,7 +40,7 @@
     }
   },
   {
-    "id": "wenfang-xuanmo-dimmed",
+    "id": "文房·玄墨·暗",
     "labelZh": "玄墨 Dimmed",
     "labelEn": "Xuanmo Dimmed",
     "colorScheme": "dark",
@@ -80,7 +80,7 @@
     }
   },
   {
-    "id": "wenfang-xuanzhi",
+    "id": "文房·宣纸",
     "labelZh": "宣纸",
     "labelEn": "Xuanzhi",
     "colorScheme": "light",
@@ -120,7 +120,7 @@
     }
   },
   {
-    "id": "wenfang-xuanzhi-dimmed",
+    "id": "文房·宣纸·暗",
     "labelZh": "宣纸 Dimmed",
     "labelEn": "Xuanzhi Dimmed",
     "colorScheme": "light",
@@ -160,7 +160,7 @@
     }
   },
   {
-    "id": "wenfang-canghai",
+    "id": "文房·沧海",
     "labelZh": "沧海",
     "labelEn": "Canghai",
     "colorScheme": "dark",
@@ -200,7 +200,7 @@
     }
   },
   {
-    "id": "wenfang-qingci",
+    "id": "文房·青瓷",
     "labelZh": "青瓷",
     "labelEn": "Qingci",
     "colorScheme": "light",

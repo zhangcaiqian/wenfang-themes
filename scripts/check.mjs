@@ -62,8 +62,12 @@ const themes = dshThemes(doc);
 if (themes.length !== doc.variants.length) fail('dsh: variant count mismatch');
 for (const [index, theme] of themes.entries()) {
   const variant = doc.variants[index];
-  if (!theme.id.startsWith('wenfang-')) fail(`dsh: theme id ${theme.id} missing series prefix`);
-  if (theme.id !== `wenfang-${variant.id}`) fail(`dsh: id mismatch for ${variant.id} → ${theme.id}`);
+  if (typeof theme.id !== 'string' || theme.id.length === 0) fail(`dsh: ${variant.id} has no theme id`);
+  if (variant.dshId !== theme.id) fail(`dsh: id mismatch for ${variant.id} → ${theme.id} (expected ${variant.dshId})`);
+  // The market renders the id verbatim as a card label; keep it narrow enough for
+  // the card's action button (CJK counts double). Real render wrapped at 24 ASCII.
+  const visualWidth = [...theme.id].reduce((n, ch) => n + (ch.charCodeAt(0) > 0x2e80 ? 2 : 1), 0);
+  if (visualWidth > 16) warn(`dsh: theme id ${theme.id} is ${visualWidth} units wide — market cards may wrap the label`);
   if (theme.colorScheme !== variant.variant) fail(`dsh: ${theme.id} colorScheme mismatch`);
   const derived = deriveDshTokens(variant);
   for (const [name, value] of Object.entries(theme.tokens)) {

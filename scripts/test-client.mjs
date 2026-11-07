@@ -8,7 +8,10 @@
  *   - first boot picks the variant closest to the current light/dark preference;
  *   - a stored choice is replayed;
  *   - once initialized, switching back to a built-in palette is NOT overridden;
- *   - switching away clears the remembered choice but keeps the init marker.
+ *   - switching away clears the remembered choice but keeps the init marker;
+ *   - the asynchronous settings adoption performed by ui-theme right after boot
+ *     does not leave the user on a built-in palette (regression: install test);
+ *   - after the restore window closes, a built-in choice stays chosen.
  */
 
 import { readFileSync } from 'node:fs';
@@ -17,6 +20,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CODE = readFileSync(join(ROOT, 'packages/dsh/lib/client.js'), 'utf8');
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const failures = [];
 const check = (condition, message) => {
@@ -163,9 +167,32 @@ function boot({ storage, preference: initialPreference }) {
   check(result.preference() === 'dark', `unknown saved id: expected built-in dark, got ${result.preference()}`);
 }
 
+// 7. Regression — the theme service adopts Host settings asynchronously right
+// after boot and snaps the preference back to the built-in value. The bundle must
+// re-assert the desired palette instead of leaving the user on the default one.
+{
+  const storage = createStorage();
+  const result = boot({ storage, preference: 'system' });
+  check(result.preference() === 'wenfang-xuanmo', `adopt race: expected initial wenfang-xuanmo, got ${result.preference()}`);
+  result.switchTo('system'); // what the async settings adoption does a moment later
+  await sleep(120);
+  check(result.preference() === 'wenfang-xuanmo', `adopt race: expected re-asserted wenfang-xuanmo, got ${result.preference()}`);
+  check(storage.getItem('wenfang-themes:active') === 'wenfang-xuanmo', 'adopt race: active choice lost');
+}
+
+// 8. After the restore window closes, a deliberate built-in choice is respected.
+{
+  const storage = createStorage();
+  const result = boot({ storage, preference: 'dark' });
+  await sleep(4300);
+  result.switchTo('light');
+  check(result.preference() === 'light', `window expiry: expected light to stay, got ${result.preference()}`);
+  check(storage.getItem('wenfang-themes:active') === null, 'window expiry: active choice was not cleared');
+}
+
 if (failures.length > 0) {
   console.error(`FAILED (${failures.length}):`);
   for (const message of failures) console.error('  ✗ ' + message);
   process.exit(1);
 }
-console.log('OK — client bundle: 6 themes register, restore/first-boot/opt-out rules hold');
+console.log('OK — client bundle: register, restore, adopt-race re-assert and opt-out rules hold');

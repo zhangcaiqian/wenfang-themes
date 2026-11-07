@@ -12,6 +12,15 @@
 // market's palette grid lists registered ids automatically; a stored choice is
 // replayed on the next boot because third-party theme ids never reach the
 // settings schema (`setTheme` persists only light/dark/system).
+//
+// Restore window: ui-theme adopts the Host's durable light/dark/system preference
+// asynchronously right after boot. A plugin that calls setTheme() during apply()
+// can be reset to the built-in palette a moment later — observed while installing
+// this bundle: `wenfang-themes:initialized` was written, the theme was not active,
+// and body had no --dsw-alias-* overrides. While the window is open we re-assert
+// the desired id whenever the preference snaps back to the boot-time built-in
+// value; a switch to a *different* built-in value is the user's choice and ends
+// the window immediately.
 window.__ModuleLoader__.load({
   id: 'wenfang-themes',
   factory: () => {
@@ -53,7 +62,8 @@ window.__ModuleLoader__.load({
       "--dsw-alias-menu-group-header-fill": "#27262b",
       "--dsw-alias-tooltip-key-bg": "#333135",
       "--dsw-alias-scrollbar-thumb": "#3a383c",
-      "--dsw-alias-state-business-tertiary": "#c08eaf"
+      "--dsw-alias-button-info-fill": "#619ac3",
+      "--dsw-alias-button-info-hover": "#78a4c3"
     }
   },
   {
@@ -92,7 +102,8 @@ window.__ModuleLoader__.load({
       "--dsw-alias-menu-group-header-fill": "#2c2b2f",
       "--dsw-alias-tooltip-key-bg": "#383639",
       "--dsw-alias-scrollbar-thumb": "#3f3d40",
-      "--dsw-alias-state-business-tertiary": "#d6a01d"
+      "--dsw-alias-button-info-fill": "#66a9c9",
+      "--dsw-alias-button-info-hover": "#7db1c8"
     }
   },
   {
@@ -131,7 +142,8 @@ window.__ModuleLoader__.load({
       "--dsw-alias-menu-group-header-fill": "#e4e1da",
       "--dsw-alias-tooltip-key-bg": "#d8d5ce",
       "--dsw-alias-scrollbar-thumb": "#d0cdc7",
-      "--dsw-alias-state-business-tertiary": "#813c85"
+      "--dsw-alias-button-info-fill": "#0f59a4",
+      "--dsw-alias-button-info-hover": "#17518c"
     }
   },
   {
@@ -170,7 +182,8 @@ window.__ModuleLoader__.load({
       "--dsw-alias-menu-group-header-fill": "#d6d0c3",
       "--dsw-alias-tooltip-key-bg": "#cbc5b8",
       "--dsw-alias-scrollbar-thumb": "#c4bdb1",
-      "--dsw-alias-state-business-tertiary": "#525288"
+      "--dsw-alias-button-info-fill": "#144a74",
+      "--dsw-alias-button-info-hover": "#194464"
     }
   },
   {
@@ -209,7 +222,8 @@ window.__ModuleLoader__.load({
       "--dsw-alias-menu-group-header-fill": "#202b35",
       "--dsw-alias-tooltip-key-bg": "#2b3640",
       "--dsw-alias-scrollbar-thumb": "#323e47",
-      "--dsw-alias-state-business-tertiary": "#c08eaf"
+      "--dsw-alias-button-info-fill": "#63bbd0",
+      "--dsw-alias-button-info-hover": "#77c0d3"
     }
   },
   {
@@ -248,12 +262,15 @@ window.__ModuleLoader__.load({
       "--dsw-alias-menu-group-header-fill": "#d5dddb",
       "--dsw-alias-tooltip-key-bg": "#cad2d0",
       "--dsw-alias-scrollbar-thumb": "#c2cac9",
-      "--dsw-alias-state-business-tertiary": "#813c85"
+      "--dsw-alias-button-info-fill": "#126e82",
+      "--dsw-alias-button-info-hover": "#176274"
     }
   }
 ];
     const ACTIVE_KEY = 'wenfang-themes:active';
     const INIT_KEY = 'wenfang-themes:initialized';
+    const RESTORE_WINDOW_MS = 4000;
+    const MAX_RETRIES = 8;
     const IDS = new Set(THEMES.map((theme) => theme.id));
 
     /** localStorage can be unavailable (sandboxed frame, storage disabled); never let it break boot. */
@@ -301,27 +318,68 @@ window.__ModuleLoader__.load({
           }
         });
 
-        // Remember which of our palettes is active; switching to a built-in
-        // light/dark/system clears the remembered choice instead of fighting it.
+        const bootPreference = ctx.theme.getTheme()?.preference;
+        const saved = read(ACTIVE_KEY);
+        const initialized = read(INIT_KEY) !== null;
+        /** The palette this boot wants active, or null when the user chose a built-in one. */
+        const target =
+          saved !== null && IDS.has(saved)
+            ? saved
+            : !initialized
+              ? preferredId(bootPreference)
+              : null;
+
+        let restoring = target !== null;
+        let attempts = 0;
+        let queued = false;
+        const endRestore = () => {
+          restoring = false;
+        };
+        const assertTarget = () => {
+          if (!restoring || target === null) return;
+          if (ctx.theme.getTheme()?.preference === target) return;
+          if (attempts >= MAX_RETRIES) {
+            endRestore();
+            return;
+          }
+          attempts += 1;
+          ctx.theme.setTheme(target);
+        };
+        const queueAssert = () => {
+          if (queued) return;
+          queued = true;
+          setTimeout(() => {
+            queued = false;
+            assertTarget();
+          }, 0);
+        };
+
+        // Remember which of our palettes is active; a deliberate switch to a
+        // built-in value clears the remembered choice instead of fighting it.
         ctx.on('theme/change', () => {
           const preference = ctx.theme.getTheme()?.preference;
           if (IDS.has(preference)) {
             write(ACTIVE_KEY, preference);
             write(INIT_KEY, '1');
-          } else {
-            write(ACTIVE_KEY, null);
+            return;
           }
+          // The Host's durable preference landing after boot is the theme service
+          // adopting settings, not a user choice — re-assert while the window is open.
+          if (restoring && preference === bootPreference) {
+            queueAssert();
+            return;
+          }
+          restoring = false;
+          write(ACTIVE_KEY, null);
         });
 
-        const saved = read(ACTIVE_KEY);
-        if (saved !== null && IDS.has(saved)) {
-          ctx.theme.setTheme(saved);
-        } else if (read(INIT_KEY) === null) {
-          // First boot after install: start from the closest variant instead of
-          // leaving the user on a built-in palette next to six unselected ones.
-          ctx.theme.setTheme(preferredId(ctx.theme.getTheme()?.preference));
+        if (target !== null) {
+          write(ACTIVE_KEY, target);
           write(INIT_KEY, '1');
         }
+        assertTarget();
+        const timer = setTimeout(endRestore, RESTORE_WINDOW_MS);
+        ctx.effect(() => () => clearTimeout(timer));
       },
     };
   },

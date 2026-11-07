@@ -35,7 +35,8 @@
       "--dsw-alias-menu-group-header-fill": "#27262b",
       "--dsw-alias-tooltip-key-bg": "#333135",
       "--dsw-alias-scrollbar-thumb": "#3a383c",
-      "--dsw-alias-state-business-tertiary": "#c08eaf"
+      "--dsw-alias-button-info-fill": "#619ac3",
+      "--dsw-alias-button-info-hover": "#78a4c3"
     }
   },
   {
@@ -74,7 +75,8 @@
       "--dsw-alias-menu-group-header-fill": "#2c2b2f",
       "--dsw-alias-tooltip-key-bg": "#383639",
       "--dsw-alias-scrollbar-thumb": "#3f3d40",
-      "--dsw-alias-state-business-tertiary": "#d6a01d"
+      "--dsw-alias-button-info-fill": "#66a9c9",
+      "--dsw-alias-button-info-hover": "#7db1c8"
     }
   },
   {
@@ -113,7 +115,8 @@
       "--dsw-alias-menu-group-header-fill": "#e4e1da",
       "--dsw-alias-tooltip-key-bg": "#d8d5ce",
       "--dsw-alias-scrollbar-thumb": "#d0cdc7",
-      "--dsw-alias-state-business-tertiary": "#813c85"
+      "--dsw-alias-button-info-fill": "#0f59a4",
+      "--dsw-alias-button-info-hover": "#17518c"
     }
   },
   {
@@ -152,7 +155,8 @@
       "--dsw-alias-menu-group-header-fill": "#d6d0c3",
       "--dsw-alias-tooltip-key-bg": "#cbc5b8",
       "--dsw-alias-scrollbar-thumb": "#c4bdb1",
-      "--dsw-alias-state-business-tertiary": "#525288"
+      "--dsw-alias-button-info-fill": "#144a74",
+      "--dsw-alias-button-info-hover": "#194464"
     }
   },
   {
@@ -191,7 +195,8 @@
       "--dsw-alias-menu-group-header-fill": "#202b35",
       "--dsw-alias-tooltip-key-bg": "#2b3640",
       "--dsw-alias-scrollbar-thumb": "#323e47",
-      "--dsw-alias-state-business-tertiary": "#c08eaf"
+      "--dsw-alias-button-info-fill": "#63bbd0",
+      "--dsw-alias-button-info-hover": "#77c0d3"
     }
   },
   {
@@ -230,7 +235,8 @@
       "--dsw-alias-menu-group-header-fill": "#d5dddb",
       "--dsw-alias-tooltip-key-bg": "#cad2d0",
       "--dsw-alias-scrollbar-thumb": "#c2cac9",
-      "--dsw-alias-state-business-tertiary": "#813c85"
+      "--dsw-alias-button-info-fill": "#126e82",
+      "--dsw-alias-button-info-hover": "#176274"
     }
   }
 ]

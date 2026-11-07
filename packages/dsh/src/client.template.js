@@ -12,6 +12,15 @@
 // market's palette grid lists registered ids automatically; a stored choice is
 // replayed on the next boot because third-party theme ids never reach the
 // settings schema (`setTheme` persists only light/dark/system).
+//
+// Restore window: ui-theme adopts the Host's durable light/dark/system preference
+// asynchronously right after boot. A plugin that calls setTheme() during apply()
+// can be reset to the built-in palette a moment later — observed while installing
+// this bundle: `wenfang-themes:initialized` was written, the theme was not active,
+// and body had no --dsw-alias-* overrides. While the window is open we re-assert
+// the desired id whenever the preference snaps back to the boot-time built-in
+// value; a switch to a *different* built-in value is the user's choice and ends
+// the window immediately.
 window.__ModuleLoader__.load({
   id: 'wenfang-themes',
   factory: () => {
@@ -19,6 +28,8 @@ window.__ModuleLoader__.load({
     const THEMES = __WENFANG_THEMES__;
     const ACTIVE_KEY = 'wenfang-themes:active';
     const INIT_KEY = 'wenfang-themes:initialized';
+    const RESTORE_WINDOW_MS = 4000;
+    const MAX_RETRIES = 8;
     const IDS = new Set(THEMES.map((theme) => theme.id));
 
     /** localStorage can be unavailable (sandboxed frame, storage disabled); never let it break boot. */
@@ -66,27 +77,68 @@ window.__ModuleLoader__.load({
           }
         });
 
-        // Remember which of our palettes is active; switching to a built-in
-        // light/dark/system clears the remembered choice instead of fighting it.
+        const bootPreference = ctx.theme.getTheme()?.preference;
+        const saved = read(ACTIVE_KEY);
+        const initialized = read(INIT_KEY) !== null;
+        /** The palette this boot wants active, or null when the user chose a built-in one. */
+        const target =
+          saved !== null && IDS.has(saved)
+            ? saved
+            : !initialized
+              ? preferredId(bootPreference)
+              : null;
+
+        let restoring = target !== null;
+        let attempts = 0;
+        let queued = false;
+        const endRestore = () => {
+          restoring = false;
+        };
+        const assertTarget = () => {
+          if (!restoring || target === null) return;
+          if (ctx.theme.getTheme()?.preference === target) return;
+          if (attempts >= MAX_RETRIES) {
+            endRestore();
+            return;
+          }
+          attempts += 1;
+          ctx.theme.setTheme(target);
+        };
+        const queueAssert = () => {
+          if (queued) return;
+          queued = true;
+          setTimeout(() => {
+            queued = false;
+            assertTarget();
+          }, 0);
+        };
+
+        // Remember which of our palettes is active; a deliberate switch to a
+        // built-in value clears the remembered choice instead of fighting it.
         ctx.on('theme/change', () => {
           const preference = ctx.theme.getTheme()?.preference;
           if (IDS.has(preference)) {
             write(ACTIVE_KEY, preference);
             write(INIT_KEY, '1');
-          } else {
-            write(ACTIVE_KEY, null);
+            return;
           }
+          // The Host's durable preference landing after boot is the theme service
+          // adopting settings, not a user choice — re-assert while the window is open.
+          if (restoring && preference === bootPreference) {
+            queueAssert();
+            return;
+          }
+          restoring = false;
+          write(ACTIVE_KEY, null);
         });
 
-        const saved = read(ACTIVE_KEY);
-        if (saved !== null && IDS.has(saved)) {
-          ctx.theme.setTheme(saved);
-        } else if (read(INIT_KEY) === null) {
-          // First boot after install: start from the closest variant instead of
-          // leaving the user on a built-in palette next to six unselected ones.
-          ctx.theme.setTheme(preferredId(ctx.theme.getTheme()?.preference));
+        if (target !== null) {
+          write(ACTIVE_KEY, target);
           write(INIT_KEY, '1');
         }
+        assertTarget();
+        const timer = setTimeout(endRestore, RESTORE_WINDOW_MS);
+        ctx.effect(() => () => clearTimeout(timer));
       },
     };
   },

@@ -39,7 +39,7 @@ export function dshThemeId(variant) {
  * @returns {Record<string, string>}
  */
 export function deriveDshTokens(variant) {
-  const { surface, ink, accent, diffAdded, diffRemoved, skill } = variant.palette;
+  const { surface, ink, accent, diffAdded, diffRemoved } = variant.palette;
   const dark = variant.variant === 'dark';
   /** Toward ink: raised surfaces and stronger borders. */
   const lift = (t) => mix(surface, ink, t);
@@ -82,10 +82,15 @@ export function deriveDshTokens(variant) {
     '--dsw-alias-menu-group-header-fill': lift(0.1),
     '--dsw-alias-tooltip-key-bg': lift(0.16),
     '--dsw-alias-scrollbar-thumb': lift(0.2),
-    // The Codex `skill` (type) color has no verified DSH alias; the business
-    // tertiary slot is the closest semantic stand-in.
-    '--dsw-alias-state-business-tertiary': skill,
-    // Pre-existing setting: keep the terminal cell size out of the theme.
+    // Composer send button. DSH paints it with the *info* semantic, not with
+    // brand-primary, so a theme that only touches brand leaves it DeepSeek blue
+    // (verified in a real render: `--dsw-alias-button-info-fill` resolved to
+    // #4176e6 while the palette accent was #126e82). Hover follows the accent
+    // toward the text color instead of the built-in lighter blue.
+    '--dsw-alias-button-info-fill': accent,
+    '--dsw-alias-button-info-hover': mix(accent, ink, 0.2),
+    // Codex's `skill` (type) color stays Codex-only: no DSH alias is verified for
+    // it, and borrowing `state-business-tertiary` tinted unrelated UI badges.
   };
 
   return { ...derived, ...(variant.dsh?.tokenOverrides ?? {}) };

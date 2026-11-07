@@ -1,0 +1,19 @@
+Wenfang · 文房六色
+==================
+
+Color inspiration
+-----------------
+The six palettes were inspired by the publicly published color values of
+Inkstone · 墨观 (https://inkstone.konata9.cc/zh/), then mapped onto the Codex
+`codex-theme-v1:…` appearance format and the DeepSeek Harness `--dsw-*` token
+model.
+
+- Wenfang is an independent series name and brand.
+- This repository is not an official theme pack of Inkstone / 墨观.
+- Only color values were referenced; no code, assets, or brand material from
+  that site is redistributed here.
+
+Third-party platforms
+---------------------
+"Codex" and "ChatGPT" are products of OpenAI. "DeepSeek Harness" is a project of
+DeepSeek AI. Product names are used only to describe compatibility.

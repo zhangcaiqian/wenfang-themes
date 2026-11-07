@@ -1,0 +1,7 @@
+# Wenfang · 文房六色 — DSH bundle patch layer.
+# One loader row: the host half registers nothing itself; the browser half is
+# discovered through this package's `dsh.client` declaration and served at
+# /plugins/wenfang-themes/client.js by dsh-client-modules.
+- insert:
+    - id: wenfang-themes
+      name: 'wenfang-themes'

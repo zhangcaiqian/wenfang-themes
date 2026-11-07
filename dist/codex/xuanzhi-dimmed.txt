@@ -1,0 +1,1 @@
+codex-theme-v1:{"codeThemeId":"solarized","theme":{"accent":"#144a74","contrast":20,"fonts":{"code":null,"ui":null},"ink":"#2f2b25","opaqueWindows":false,"semanticColors":{"diffAdded":"#1a6840","diffRemoved":"#82111f","skill":"#525288"},"surface":"#e9e2d4"},"variant":"light"}

@@ -1,0 +1,20 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # Build is deterministic: regenerate every artifact, then fail on any diff.
+      - run: node scripts/build.mjs
+      - run: git diff --exit-code
+      - run: node scripts/check.mjs
+      - run: node scripts/test-client.mjs

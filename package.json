@@ -1,0 +1,16 @@
+{
+  "name": "wenfang-themes-monorepo",
+  "private": true,
+  "type": "module",
+  "description": "Wenfang · 文房六色 — theme series source, Codex adapter and DeepSeek Harness theme plugin.",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/check.mjs",
+    "test": "node scripts/test-client.mjs",
+    "verify": "node scripts/build.mjs && node scripts/check.mjs && node scripts/test-client.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}

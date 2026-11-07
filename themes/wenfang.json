@@ -1,0 +1,111 @@
+{
+  "series": {
+    "name": "Wenfang",
+    "nameZh": "文房六色",
+    "slug": "wenfang",
+    "tagline": "一套面向 Coding Agent 的中式美学外观主题：墨、纸、海、瓷六种气质，深浅各半。",
+    "inspiration": {
+      "name": "Inkstone · 墨观",
+      "url": "https://inkstone.konata9.cc/zh/",
+      "note": "色板灵感致敬 Inkstone 公开色值，经映射为各端配置；系列名与品牌独立，非该站点官方主题包。"
+    }
+  },
+  "variants": [
+    {
+      "id": "xuanmo",
+      "nameZh": "玄墨",
+      "nameEn": "Xuanmo",
+      "variant": "dark",
+      "tagline": "松烟墨底、朱砂批注；适合夜间长时间编码。",
+      "codex": { "codeThemeId": "one-dark", "contrast": 58 },
+      "palette": {
+        "surface": "#14131a",
+        "ink": "#d4cec4",
+        "accent": "#619ac3",
+        "diffAdded": "#2bae85",
+        "diffRemoved": "#e25737",
+        "skill": "#c08eaf"
+      }
+    },
+    {
+      "id": "xuanmo-dimmed",
+      "nameZh": "玄墨 Dimmed",
+      "nameEn": "Xuanmo Dimmed",
+      "variant": "dark",
+      "tagline": "同一方墨、灯光调暗一档；适合光线柔和的房间。",
+      "codex": { "codeThemeId": "one-dark", "contrast": 52 },
+      "palette": {
+        "surface": "#19181e",
+        "ink": "#d8d2c6",
+        "accent": "#66a9c9",
+        "diffAdded": "#69a794",
+        "diffRemoved": "#e25737",
+        "skill": "#d6a01d"
+      }
+    },
+    {
+      "id": "xuanzhi",
+      "nameZh": "宣纸",
+      "nameEn": "Xuanzhi",
+      "variant": "light",
+      "tagline": "生宣暖白、青绿设色；适合白天浅色环境。",
+      "codex": { "codeThemeId": "solarized", "contrast": 22 },
+      "palette": {
+        "surface": "#f7f4ed",
+        "ink": "#35322d",
+        "accent": "#0f59a4",
+        "diffAdded": "#1a6840",
+        "diffRemoved": "#c23142",
+        "skill": "#813c85"
+      }
+    },
+    {
+      "id": "xuanzhi-dimmed",
+      "nameZh": "宣纸 Dimmed",
+      "nameEn": "Xuanzhi Dimmed",
+      "variant": "light",
+      "tagline": "陈纸暖灰、墨色更深；适合低眩光阅读。",
+      "codex": { "codeThemeId": "solarized", "contrast": 20 },
+      "palette": {
+        "surface": "#e9e2d4",
+        "ink": "#2f2b25",
+        "accent": "#144a74",
+        "diffAdded": "#1a6840",
+        "diffRemoved": "#82111f",
+        "skill": "#525288"
+      }
+    },
+    {
+      "id": "canghai",
+      "nameZh": "沧海",
+      "nameEn": "Canghai",
+      "variant": "dark",
+      "tagline": "深海暮色、青绿矿物；冷静深色画布。",
+      "codex": { "codeThemeId": "nord", "contrast": 56 },
+      "palette": {
+        "surface": "#0d1822",
+        "ink": "#c8d4dd",
+        "accent": "#63bbd0",
+        "diffAdded": "#1ba784",
+        "diffRemoved": "#e25737",
+        "skill": "#c08eaf"
+      }
+    },
+    {
+      "id": "qingci",
+      "nameZh": "青瓷",
+      "nameEn": "Qingci",
+      "variant": "light",
+      "tagline": "月白釉底、青灰题字；适合白天与浅色桌面。",
+      "codex": { "codeThemeId": "github-light", "contrast": 24 },
+      "palette": {
+        "surface": "#e8f0ec",
+        "ink": "#2b333e",
+        "accent": "#126e82",
+        "diffAdded": "#1a6840",
+        "diffRemoved": "#82111f",
+        "skill": "#813c85"
+      }
+    }
+  ]
+}

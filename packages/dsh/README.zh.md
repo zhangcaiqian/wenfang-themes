@@ -32,25 +32,29 @@ dsh plugin --profile web add link:/abs/path/to/wenfang-themes/packages/dsh   # �
   diffAdded / diffRemoved）推出一组 `--dsw-*`；设计者要钉某个值就写该 variant 的
   `dsh.tokenOverrides`。
 
-## 实测记录（2026-11-07，隔离 profile + 无头 Chrome）
+## 实测记录（2026-11-07，隔离 profile + 无头 Chrome，两轮）
 
-在 `DSH_HOME=/tmp/dsh-wf-home` 的独立 profile 里 `dsh plugin add link:…` 安装，再用
-Playwright 驱动 Chrome 真实加载页面核对 `body` 上的内联 token，发现并修了三处问题：
+在独立 profile 里 `dsh plugin add link:…` 安装，再用 Playwright 驱动 Chrome 真实加载页面，
+核对 `body` 上的内联 token。两轮共发现并修复四处问题：
 
-1. **异步 adoption 会把主题打回内置**：`apply()` 里 `setTheme()` 成功后，
-   ui-theme 随后从 Host 设置 adopt `system/light/dark`，preference 被重置，页面停在
-   内置配色（当时 `wenfang-themes:initialized` 已写入、`active` 缺失、`body` 没有任何
-   `--dsw-alias-*`）。修复：4 秒 restore 窗口内，只要 preference 回到 boot 时的内置值
-   就重新 `setTheme(target)`（最多 8 次）；换成**另一个**内置值视为用户选择，立即停手。
-   回归测试见 `scripts/test-client.mjs` 的第 7、8 条。
-2. **发送按钮不吃 brand token**：真实渲染里 `--dsw-alias-brand-primary` 已是
-   `#126e82`，发送按钮仍是内置 DeepSeek 蓝 `#4176e6`——它走
-   `--dsw-alias-button-info-fill`。已把该 token 及 hover 映射到 accent。
-3. **Codex 的 `skill` 色没有 DSH 对等物**：曾映射到 `--dsw-alias-state-business-tertiary`，
+1. **异步 adoption 会把主题打回内置**（第一轮：durable 偏好 = `system`）：`apply()` 里
+   `setTheme()` 成功后，ui-theme 随后从 Host 设置 adopt，preference 被重置，页面停在内置
+   配色（`initialized` 已写入、`active` 缺失、`body` 无 `--dsw-alias-*`）。
+2. **adopt 的值不一定等于 boot 时的默认值**（第二轮：durable 偏好 = `dark`）：第一版修复
+   用「preference 是否回到 boot 值」判断，durable `dark` 与 boot 默认 `system` 不同，于是被
+   误判成用户选择、停止恢复。实测轨迹：500ms 时玄墨生效，800ms 被打回内置。
+   最终修复：包装 `ctx.theme.setTheme` 区分「显式选择」（UI / 市场 / 我们的恢复调用）与
+   「adopt」（不经 setTheme 直接改 preference）；对后者持续重新 `setTheme(target)`。
+   若服务对象不可包装，退化为 6 秒窗口内对所有内置偏好重新断言。
+   回归测试见 `scripts/test-client.mjs` 第 7–10 条。
+3. **发送按钮不吃 brand token**：真实渲染里 `--dsw-alias-brand-primary` 已是 `#126e82`，
+   发送按钮仍是内置 DeepSeek 蓝 `#4176e6`——它走 `--dsw-alias-button-info-fill`。
+   已把该 token 与 hover 映射到 accent。
+4. **Codex 的 `skill` 色没有 DSH 对等物**：曾映射到 `--dsw-alias-state-business-tertiary`，
    真实渲染里它给「预览版」徽章上了紫色。已移除映射，`skill` 保持 Codex-only。
 
-验证覆盖：首次安装 → 玄墨生效（`#14131a`）；刷新恢复；切到青瓷（`#e8f0ec`，明色）；
-清空选择后回落到内置（无 token 覆盖）。
+验证覆盖：首次安装 → 玄墨生效（`#14131a`）并在 adopt 后保持；刷新恢复；切换到沧海
+（`#0d1822`）；在设置里显式点「浅色」→ 回落内置且刷新后不被抢回；切回自选调色板正常。
 
 ## 坑（与官方契约相关）
 

@@ -13,14 +13,19 @@
 // replayed on the next boot because third-party theme ids never reach the
 // settings schema (`setTheme` persists only light/dark/system).
 //
-// Restore window: ui-theme adopts the Host's durable light/dark/system preference
-// asynchronously right after boot. A plugin that calls setTheme() during apply()
-// can be reset to the built-in palette a moment later — observed while installing
-// this bundle: `wenfang-themes:initialized` was written, the theme was not active,
-// and body had no --dsw-alias-* overrides. While the window is open we re-assert
-// the desired id whenever the preference snaps back to the boot-time built-in
-// value; a switch to a *different* built-in value is the user's choice and ends
-// the window immediately.
+// Asynchronous adoption: ui-theme adopts the Host's durable light/dark/system
+// preference right after boot (and again whenever Host settings are pushed). A
+// plugin that calls setTheme() during apply() therefore gets reset to the built-in
+// palette — reproduced with a durable `dark` preference: the palette was active at
+// 500ms and gone by 800ms, leaving `initialized` behind and no --dsw-alias-* on
+// body.
+//
+// Telling adoptions apart from user choices: ThemeRuntime.adopt() changes the
+// preference and publishes WITHOUT calling setTheme(), while every UI, the market
+// and our own restore call setTheme(). We wrap the service method, mark explicit
+// calls, and re-assert the desired palette for any preference change that bypassed
+// it. If the service cannot be wrapped (frozen object), a short fallback window
+// re-asserts on every built-in preference instead.
 window.__ModuleLoader__.load({
   id: 'wenfang-themes',
   factory: () => {
@@ -269,8 +274,8 @@ window.__ModuleLoader__.load({
 ];
     const ACTIVE_KEY = 'wenfang-themes:active';
     const INIT_KEY = 'wenfang-themes:initialized';
-    const RESTORE_WINDOW_MS = 4000;
-    const MAX_RETRIES = 8;
+    const FALLBACK_WINDOW_MS = 6000;
+    const MAX_REASSERTS = 24;
     const IDS = new Set(THEMES.map((theme) => theme.id));
 
     /** localStorage can be unavailable (sandboxed frame, storage disabled); never let it break boot. */
@@ -301,49 +306,56 @@ window.__ModuleLoader__.load({
       // throw inside a client apply() fails the whole web boot.
       inject: ['theme'],
       apply(ctx) {
-        const alreadyRegistered = new Set((ctx.theme.getTheme()?.themes ?? []).map((theme) => theme.id));
+        const service = ctx.theme;
+        const alreadyRegistered = new Set((service.getTheme()?.themes ?? []).map((theme) => theme.id));
         const disposers = [];
         for (const theme of THEMES) {
           if (alreadyRegistered.has(theme.id)) continue;
-          disposers.push(ctx.theme.register({ id: theme.id, colorScheme: theme.colorScheme, tokens: theme.tokens }));
+          disposers.push(service.register({ id: theme.id, colorScheme: theme.colorScheme, tokens: theme.tokens }));
         }
-        ctx.effect(() => () => {
-          while (disposers.length > 0) {
-            const dispose = disposers.pop();
-            try {
-              dispose();
-            } catch {
-              /* ignore */
-            }
-          }
-        });
 
-        const bootPreference = ctx.theme.getTheme()?.preference;
+        // Distinguish "the theme service adopted Host settings" (no setTheme call)
+        // from "a user or another plugin chose a palette" (setTheme call).
+        const originalSetTheme = service.setTheme;
+        let explicitChoice = null;
+        let internal = false;
+        let wrapped = false;
+        try {
+          service.setTheme = function wrappedSetTheme(id) {
+            if (!internal) explicitChoice = id;
+            return originalSetTheme.call(service, id);
+          };
+          wrapped = service.setTheme !== originalSetTheme;
+        } catch {
+          wrapped = false;
+        }
+        const setInternal = (id) => {
+          internal = true;
+          try {
+            service.setTheme(id);
+          } finally {
+            internal = false;
+          }
+        };
+
+        const bootPreference = service.getTheme()?.preference;
         const saved = read(ACTIVE_KEY);
         const initialized = read(INIT_KEY) !== null;
         /** The palette this boot wants active, or null when the user chose a built-in one. */
-        const target =
-          saved !== null && IDS.has(saved)
-            ? saved
-            : !initialized
-              ? preferredId(bootPreference)
-              : null;
-
+        let target = saved !== null && IDS.has(saved) ? saved : !initialized ? preferredId(bootPreference) : null;
         let restoring = target !== null;
         let attempts = 0;
         let queued = false;
-        const endRestore = () => {
-          restoring = false;
-        };
+
         const assertTarget = () => {
           if (!restoring || target === null) return;
-          if (ctx.theme.getTheme()?.preference === target) return;
-          if (attempts >= MAX_RETRIES) {
-            endRestore();
+          if (service.getTheme()?.preference === target) return;
+          if (attempts >= MAX_REASSERTS) {
+            restoring = false;
             return;
           }
           attempts += 1;
-          ctx.theme.setTheme(target);
+          setInternal(target);
         };
         const queueAssert = () => {
           if (queued) return;
@@ -354,23 +366,32 @@ window.__ModuleLoader__.load({
           }, 0);
         };
 
-        // Remember which of our palettes is active; a deliberate switch to a
-        // built-in value clears the remembered choice instead of fighting it.
         ctx.on('theme/change', () => {
-          const preference = ctx.theme.getTheme()?.preference;
+          const preference = service.getTheme()?.preference;
           if (IDS.has(preference)) {
+            target = preference;
+            restoring = true;
+            attempts = 0;
             write(ACTIVE_KEY, preference);
             write(INIT_KEY, '1');
             return;
           }
-          // The Host's durable preference landing after boot is the theme service
-          // adopting settings, not a user choice — re-assert while the window is open.
-          if (restoring && preference === bootPreference) {
-            queueAssert();
+          // Built-in preference. An explicit setTheme() call is the user's choice;
+          // a preference change that bypassed setTheme() is the theme service
+          // adopting Host settings, so the desired palette is re-asserted.
+          if (explicitChoice !== null && !IDS.has(explicitChoice)) {
+            target = null;
+            restoring = false;
+            write(ACTIVE_KEY, null);
             return;
           }
-          restoring = false;
-          write(ACTIVE_KEY, null);
+          if (wrapped) {
+            if (target !== null) queueAssert();
+            else write(ACTIVE_KEY, null);
+            return;
+          }
+          if (restoring && target !== null) queueAssert();
+          else write(ACTIVE_KEY, null);
         });
 
         if (target !== null) {
@@ -378,8 +399,26 @@ window.__ModuleLoader__.load({
           write(INIT_KEY, '1');
         }
         assertTarget();
-        const timer = setTimeout(endRestore, RESTORE_WINDOW_MS);
-        ctx.effect(() => () => clearTimeout(timer));
+
+        const fallbackTimer = wrapped ? null : setTimeout(() => {
+          restoring = false;
+        }, FALLBACK_WINDOW_MS);
+        ctx.effect(() => () => {
+          if (fallbackTimer !== null) clearTimeout(fallbackTimer);
+          try {
+            service.setTheme = originalSetTheme;
+          } catch {
+            /* ignore */
+          }
+          while (disposers.length > 0) {
+            const dispose = disposers.pop();
+            try {
+              dispose();
+            } catch {
+              /* ignore */
+            }
+          }
+        });
       },
     };
   },

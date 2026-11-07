@@ -9,9 +9,11 @@
  *   - a stored choice is replayed;
  *   - once initialized, switching back to a built-in palette is NOT overridden;
  *   - switching away clears the remembered choice but keeps the init marker;
- *   - the asynchronous settings adoption performed by ui-theme right after boot
- *     does not leave the user on a built-in palette (regression: install test);
- *   - after the restore window closes, a built-in choice stays chosen.
+ *   - the asynchronous settings adoption performed by ui-theme (which changes the
+ *     preference WITHOUT calling setTheme) does not leave the user on a built-in
+ *     palette (regression: real-install test with a durable `dark` preference);
+ *   - an explicit built-in choice from the UI (a setTheme call) is respected even
+ *     when the Host settings adoption repeats it afterwards.
  */
 
 import { readFileSync } from 'node:fs';
@@ -104,7 +106,13 @@ function boot({ storage, preference: initialPreference }) {
     calls,
     storage,
     preference: () => preference,
+    /** Explicit choice, the way a UI/market calls it. */
     switchTo: (id) => theme.setTheme(id),
+    /** What ui-theme's adopt() does: change the preference, notify, no setTheme call. */
+    adopt: (id) => {
+      preference = id;
+      for (const listener of listeners) listener();
+    },
   };
 }
 
@@ -167,27 +175,50 @@ function boot({ storage, preference: initialPreference }) {
   check(result.preference() === 'dark', `unknown saved id: expected built-in dark, got ${result.preference()}`);
 }
 
-// 7. Regression — the theme service adopts Host settings asynchronously right
-// after boot and snaps the preference back to the built-in value. The bundle must
-// re-assert the desired palette instead of leaving the user on the default one.
+// 7. Regression — durable preference differs from the boot-time default: the
+// service adopts `dark` a moment after our setTheme, without calling setTheme.
+// The bundle must re-assert the desired palette (not treat it as a user choice).
 {
   const storage = createStorage();
   const result = boot({ storage, preference: 'system' });
   check(result.preference() === 'wenfang-xuanmo', `adopt race: expected initial wenfang-xuanmo, got ${result.preference()}`);
-  result.switchTo('system'); // what the async settings adoption does a moment later
+  result.adopt('dark');
   await sleep(120);
   check(result.preference() === 'wenfang-xuanmo', `adopt race: expected re-asserted wenfang-xuanmo, got ${result.preference()}`);
   check(storage.getItem('wenfang-themes:active') === 'wenfang-xuanmo', 'adopt race: active choice lost');
 }
 
-// 8. After the restore window closes, a deliberate built-in choice is respected.
+// 8. A stored palette survives adoption on the next boot.
+{
+  const storage = createStorage({ 'wenfang-themes:active': 'wenfang-qingci', 'wenfang-themes:initialized': '1' });
+  const result = boot({ storage, preference: 'dark' });
+  check(result.preference() === 'wenfang-qingci', `stored + adopt: expected qingci, got ${result.preference()}`);
+  result.adopt('dark');
+  await sleep(120);
+  check(result.preference() === 'wenfang-qingci', `stored + adopt: expected qingci after adopt, got ${result.preference()}`);
+}
+
+// 9. An explicit built-in choice (setTheme from the UI) wins over later adoption.
 {
   const storage = createStorage();
   const result = boot({ storage, preference: 'dark' });
-  await sleep(4300);
   result.switchTo('light');
-  check(result.preference() === 'light', `window expiry: expected light to stay, got ${result.preference()}`);
-  check(storage.getItem('wenfang-themes:active') === null, 'window expiry: active choice was not cleared');
+  await sleep(60);
+  check(result.preference() === 'light', `explicit built-in: expected light, got ${result.preference()}`);
+  check(storage.getItem('wenfang-themes:active') === null, 'explicit built-in: active choice was not cleared');
+  result.adopt('light'); // Host settings push repeats the same durable value
+  await sleep(120);
+  check(result.preference() === 'light', `explicit built-in: adoption must not resurrect a Wenfang palette, got ${result.preference()}`);
+}
+
+// 10. Picking one of our palettes again ends the built-in state.
+{
+  const storage = createStorage({ 'wenfang-themes:initialized': '1' });
+  const result = boot({ storage, preference: 'light' });
+  result.switchTo('wenfang-canghai');
+  await sleep(60);
+  check(result.preference() === 'wenfang-canghai', `re-pick: expected canghai, got ${result.preference()}`);
+  check(storage.getItem('wenfang-themes:active') === 'wenfang-canghai', 're-pick: active choice not stored');
 }
 
 if (failures.length > 0) {

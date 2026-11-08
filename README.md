@@ -35,6 +35,11 @@ and the DeepSeek Harness theme plugin.
 | Canghai | Dark | [`dist/codex/canghai.txt`](dist/codex/canghai.txt) |
 | Qingci | Light | [`dist/codex/qingci.txt`](dist/codex/qingci.txt) |
 
+## Preview in DeepSeek Harness
+
+<img src="packages/dsh/assets/screenshots/dsh-xuanmo.png" width="720" alt="Wenfang Xuanmo applied to the DeepSeek Harness web UI">
+<img src="packages/dsh/assets/screenshots/dsh-qingci.png" width="720" alt="Wenfang Qingci applied to the DeepSeek Harness web UI">
+
 ## Use with DeepSeek Harness
 
 One package registers all six palettes (`wenfang-xuanmo` … `wenfang-qingci`):
